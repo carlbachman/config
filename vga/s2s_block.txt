@@ -1,0 +1,59 @@
+vpn {
+    ipsec {
+      esp-group ESP-SG {
+            compression disable
+            lifetime 3600
+            mode tunnel
+            pfs enable
+            proposal 1 {
+                encryption aes256
+                hash sha1
+            }
+            proposal 2 {
+                encryption 3des
+                hash md5
+            }
+        }
+        ike-group IKE-SG {
+            lifetime 28800
+            proposal 1 {
+                encryption aes256 
+                hash sha1
+            }
+            proposal 2 {
+                encryption aes128
+                hash sha1
+            }
+        }
+        ipsec-interfaces {
+            interface bond1
+        }
+        nat-networks {
+            allowed-network 0.0.0.0/0 {
+            }
+        }
+        nat-traversal enable
+        site-to-site {
+            peer 192.168.100.1 {
+                authentication {
+                    mode pre-shared-secret
+                    pre-shared-secret blah
+                }
+                connection-type initiate
+                default-esp-group ESP-SG
+                ike-group IKE-SG
+                local-address 119.81.59.84
+                tunnel 1 {
+                    allow-nat-networks disable
+                    allow-public-networks disable
+                    local {
+                        prefix 192.168.200.0/24
+                    }
+                    remote {
+                        prefix 172.18.0.0/16
+                    }
+                }
+            }
+        }
+    }
+}
