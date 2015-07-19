@@ -1,0 +1,45 @@
+bachman@code:~$ iperf -c 119.81.117.130 -P 1
+------------------------------------------------------------
+Client connecting to 119.81.117.130, TCP port 5001
+TCP window size: 23.5 KByte (default)
+------------------------------------------------------------
+[  3] local 119.81.77.66 port 50002 connected with 119.81.117.130 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3]  0.0-10.0 sec  1.06 GBytes   910 Mbits/sec
+
+bachman@code:~$ iperf -c 119.81.117.130 -P 5
+------------------------------------------------------------
+Client connecting to 119.81.117.130, TCP port 5001
+TCP window size: 23.5 KByte (default)
+------------------------------------------------------------
+[  4] local 119.81.77.66 port 50005 connected with 119.81.117.130 port 5001
+[  5] local 119.81.77.66 port 50006 connected with 119.81.117.130 port 5001
+[  6] local 119.81.77.66 port 50007 connected with 119.81.117.130 port 5001
+[  3] local 119.81.77.66 port 50004 connected with 119.81.117.130 port 5001
+[  7] local 119.81.77.66 port 50008 connected with 119.81.117.130 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  5]  0.0-10.0 sec   175 MBytes   147 Mbits/sec
+[  6]  0.0-10.0 sec   267 MBytes   224 Mbits/sec
+[  3]  0.0-10.0 sec   212 MBytes   178 Mbits/sec
+[  4]  0.0-10.0 sec   215 MBytes   180 Mbits/sec
+[  7]  0.0-10.0 sec   215 MBytes   180 Mbits/sec
+[SUM]  0.0-10.0 sec  1.06 GBytes   909 Mbits/sec
+
+root@carlB-0:~# iperf -c 119.81.77.66 -P 5
+------------------------------------------------------------
+Client connecting to 119.81.77.66, TCP port 5001
+TCP window size: 23.5 KByte (default)
+------------------------------------------------------------
+[  4] local 119.81.117.130 port 44877 connected with 119.81.77.66 port 5001
+[  5] local 119.81.117.130 port 44878 connected with 119.81.77.66 port 5001
+[  6] local 119.81.117.130 port 44879 connected with 119.81.77.66 port 5001
+[  3] local 119.81.117.130 port 44876 connected with 119.81.77.66 port 5001
+[  7] local 119.81.117.130 port 44880 connected with 119.81.77.66 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  5]  0.0-10.0 sec   170 MBytes   143 Mbits/sec
+[  4]  0.0-10.0 sec   231 MBytes   194 Mbits/sec
+[  7]  0.0-10.0 sec   263 MBytes   220 Mbits/sec
+[  6]  0.0-10.0 sec   156 MBytes   131 Mbits/sec
+[  3]  0.0-10.0 sec   271 MBytes   227 Mbits/sec
+[SUM]  0.0-10.0 sec  1.07 GBytes   913 Mbits/sec
+

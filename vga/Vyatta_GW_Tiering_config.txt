@@ -1,0 +1,300 @@
+firewall {
+
+    all-ping disable
+    broadcast-ping disable
+    config-trap disable
+    ipv6-receive-redirects disable
+    ipv6-src-route disable
+    ip-src-route disable
+    log-martians enable
+
+    name public_to_tier1 {
+        default-action drop
+        description "Filter traffic from PUBLIC zone to TIER1 zone"
+        rule 10 {
+            action accept
+            destination {
+                port http,https,ssh
+            }
+            protocol tcp
+        }
+        rule 20 {
+            action accept
+            protocol icmp
+        }
+    }
+
+    name public_to_tier2 {
+        default-action drop
+        description "Filter packets from PUBLIC zone to TIER2 zone"
+        rule 10 {
+            action accept
+            destination {
+                port http,https,ssh
+            }
+            protocol tcp
+        }
+        rule 20 {
+            action accept
+            protocol icmp
+        }
+    }
+
+    name to_private {
+        default-action drop
+        description "allow all traffic to private network"
+        rule 100 {
+            action accept
+        }
+    }
+
+    name to_public {
+        default-action drop
+        description "allow all traffic but RFC1918 to PUBLIC zone"
+        rule 100 {
+            action accept
+        }
+    }
+
+    receive-redirects disable
+    send-redirects disable
+    source-validation disable
+    
+    state-policy {
+        established {
+            action accept
+        }
+        invalid {
+            action drop
+        }
+        related {
+            action accept
+        }
+    }
+    syn-cookies enable
+}
+interfaces {
+    bonding bond0 {
+        address 10.64.12.226/26
+        hash-policy layer3+4
+        mode 802.3ad
+        vif 1300 {
+            address 10.66.134.9/29
+        }
+        vif 2394 {
+            address 10.66.76.113/28
+        }
+        vrrp {
+            vrrp-group 1 {
+                advertise-interval 1
+                preempt false
+                priority 254
+                rfc3768-compatibility
+                sync-group vgroup1
+                virtual-address 10.64.12.225/26
+            }
+        }
+    }
+    bonding bond1 {
+        address 119.81.18.147/29
+        address 2401:c900:1101:020a:0000:0000:0000:0003/64
+        hash-policy layer3+4
+        mode 802.3ad
+        vif 805 {
+            address 119.81.3.9/29
+        }
+        vif 2656 {
+            address 119.81.117.129/29
+        }
+        vrrp {
+            vrrp-group 1 {
+                advertise-interval 1
+                preempt false
+                priority 254
+                rfc3768-compatibility
+                sync-group vgroup1
+                virtual-address 119.81.18.146/29
+            }
+        }
+    }
+    ethernet eth0 {
+        bond-group bond0
+        duplex auto
+        hw-id 00:25:90:27:0a:48
+        smp_affinity auto
+        speed auto
+    }
+    ethernet eth1 {
+        bond-group bond1
+        duplex auto
+        hw-id 00:25:90:27:0a:49
+        smp_affinity auto
+        speed auto
+    }
+    ethernet eth2 {
+        bond-group bond0
+        duplex auto
+        hw-id 00:25:90:27:0a:4a
+        smp_affinity auto
+        speed auto
+    }
+    ethernet eth3 {
+        bond-group bond1
+        duplex auto
+        hw-id 00:25:90:27:0a:4b
+        smp_affinity auto
+        speed auto
+    }
+    loopback lo {
+    }
+}
+protocols {
+    static {
+        route 10.0.0.0/8 {
+            next-hop 10.64.12.193 {
+            }
+        }
+        route6 ::/0 {
+            next-hop 2401:c900:1101:020a:0000:0000:0000:0001 {
+            }
+        }
+    }
+}
+service {
+    https {
+        http-redirect enable
+        listen-address 10.64.12.226
+    }
+    ssh {
+        port 22
+    }
+}
+system {
+    config-management {
+        commit-revisions 20
+    }
+    conntrack {
+        expect-table-size 2048
+        hash-size 32768
+        table-size 262144
+    }
+    console {
+        device ttyS0 {
+            speed 9600
+        }
+    }
+    domain-name softlayer-singapore-test.com
+    gateway-address 119.81.18.145
+    host-name fw
+    login {
+        user root {
+            authentication {
+                encrypted-password .
+                plaintext-password ""
+            }
+            level admin
+        }
+        user vyatta {
+            authentication {
+                encrypted-password . 
+                plaintext-password ""
+            }
+            level admin
+        }
+    }
+    name-server 10.0.80.11
+    name-server 10.0.80.12
+    ntp {
+        server time.service.networklayer.com {
+        }
+    }
+    package {
+        auto-sync 1
+        repository supported {
+            components main
+            distribution stable
+            password ""
+            url http://packages.vyatta.com/vyatta-supported
+            username ""
+        }
+    }
+    syslog {
+        global {
+            facility all {
+                level notice
+            }
+            facility protocols {
+                level debug
+            }
+        }
+    }
+    time-zone Asia/Singapore
+}
+zone-policy {
+
+    zone private {
+        default-action drop
+        description PRIVATE
+        from tier1_private {
+            firewall {
+                name to_private
+            }
+        }
+        from tier2_private {
+            firewall {
+                name to_private
+            }
+        }
+        interface bond0
+    }
+
+    zone public {
+        default-action drop
+        description PUBLIC
+        from tier1_public {
+            firewall {
+                name to_public
+            }
+        }
+        from tier2_public {
+            firewall {
+                name to_public
+            }
+        }
+        interface bond1
+    }
+
+    zone tier1_private {
+        default-action drop
+        description "Tier 1 Private"
+        interface bond0.1300
+    }
+
+    zone tier1_public {
+        default-action drop
+        description "Tier 1 Public"
+        from public {
+            firewall {
+                name public_to_tier1
+            }
+        }
+        interface bond1.805
+    }
+
+    zone tier2_private {
+        default-action drop
+        description "Tier 2 Private"
+        interface bond0.2394
+    }
+
+    zone tier2_public {
+        default-action drop
+        description "Tier 2 Public"
+        from public {
+            firewall {
+                name public_to_tier2
+            }
+        }
+        interface bond1.2656
+    }
+}
