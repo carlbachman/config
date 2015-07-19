@@ -1,0 +1,371 @@
+firewall {
+    all-ping enable
+    broadcast-ping disable
+    config-trap disable
+    ipv6-receive-redirects disable
+    ipv6-src-route disable
+    ip-src-route disable
+    log-martians enable
+    name SERVICE-ALLOW {
+        default-action drop
+        rule 1 {
+            action accept
+            destination {
+                address 10.0.64.0/19
+            }
+        }
+        rule 2 {
+            action accept
+            destination {
+                address 10.1.128.0/19
+            }
+        }
+        rule 3 {
+            action accept
+            destination {
+                address 10.0.86.0/24
+            }
+        }
+        rule 4 {
+            action accept
+            destination {
+                address 10.2.128.0/20
+            }
+        }
+        rule 5 {
+            action accept
+            destination {
+                address 10.1.176.0/20
+            }
+        }
+        rule 6 {
+            action accept
+            destination {
+                address 10.1.64.0/19
+            }
+        }
+        rule 7 {
+            action accept
+            destination {
+                address 10.1.96.0/19
+            }
+        }
+        rule 8 {
+            action accept
+            destination {
+                address 10.1.192.0/20
+            }
+        }
+        rule 9 {
+            action accept
+            destination {
+                address 10.1.160.0/20
+            }
+        }
+        rule 10 {
+            action accept
+            destination {
+                address 10.2.32.0/20
+            }
+        }
+        rule 11 {
+            action accept
+            destination {
+                address 10.2.64.0/20
+            }
+        }
+        rule 12 {
+            action accept
+            destination {
+                address 10.2.112.0/20
+            }
+        }
+        rule 13 {
+            action accept
+            destination {
+                address 10.2.160.0/20
+            }
+        }
+        rule 14 {
+            action accept
+            destination {
+                address 10.1.208.0/20
+            }
+        }
+        rule 15 {
+            action accept
+            destination {
+                address 10.2.80.0/20
+            }
+        }
+        rule 16 {
+            action accept
+            destination {
+                address 10.2.144.0/20
+            }
+        }
+        rule 17 {
+            action accept
+            destination {
+                address 10.2.48.0/20
+            }
+        }
+        rule 18 {
+            action accept
+            destination {
+                address 10.2.176.0/20
+            }
+        }
+        rule 19 {
+            action accept
+            destination {
+                address 10.3.64.0/20
+            }
+        }
+        rule 20 {
+            action accept
+            destination {
+                address 10.3.80.0/20
+            }
+        }
+    }
+    receive-redirects disable
+    send-redirects disable
+    source-validation disable
+    state-policy {
+        established {
+            action accept
+        }
+        invalid {
+            action drop
+        }
+        related {
+            action accept
+        }
+    }
+    syn-cookies enable
+}
+interfaces {
+    bonding bond0 {
+        address 10.67.78.48/26
+        hash-policy layer3+4
+        mode 802.3ad
+        vif 938 {
+            address 10.64.4.113/28
+            address 192.168.200.1/24
+        }
+        vrrp {
+            vrrp-group 2 {
+                advertise-interval 1
+                preempt false
+                priority 254
+                rfc3768-compatibility
+                sync-group vgroup2
+                virtual-address 10.67.78.45/26
+            }
+        }
+    }
+    bonding bond1 {
+        address 119.81.59.84/29
+        address 2401:c900:1101:017f:0000:0000:0000:0004/64
+        hash-policy layer3+4
+        mode 802.3ad
+        vif 2146 {
+            address 119.81.33.177/28
+        }
+        vrrp {
+            vrrp-group 2 {
+                advertise-interval 1
+                preempt false
+                priority 254
+                rfc3768-compatibility
+                sync-group vgroup2
+                virtual-address 119.81.59.85/29
+            }
+        }
+    }
+    ethernet eth0 {
+        bond-group bond0
+        duplex auto
+        hw-id 00:25:90:74:a9:a2
+        smp_affinity auto
+        speed auto
+    }
+    ethernet eth1 {
+        bond-group bond1
+        duplex auto
+        hw-id 00:25:90:74:a9:a3
+        smp_affinity auto
+        speed auto
+    }
+    ethernet eth2 {
+        bond-group bond0
+        duplex auto
+        hw-id 00:25:90:74:a9:a4
+        smp_affinity auto
+        speed auto
+    }
+    ethernet eth3 {
+        bond-group bond1
+        duplex auto
+        hw-id 00:25:90:74:a9:a5
+        smp_affinity auto
+        speed auto
+    }
+    loopback lo {
+    }
+}
+protocols {
+    static {
+        route 10.0.0.0/8 {
+            next-hop 10.67.78.1 {
+            }
+        }
+        route6 ::/0 {
+            next-hop 2401:c900:1101:017f:0000:0000:0000:0001 {
+            }
+        }
+    }
+}
+service {
+    ssh {
+        port 22
+    }
+}
+system {
+    config-management {
+        commit-revisions 20
+    }
+    conntrack {
+        expect-table-size 2048
+        hash-size 32768
+        table-size 262144
+    }
+    console {
+        device ttyS0 {
+            speed 9600
+        }
+    }
+    domain-name softlayer-singapore-test.com
+    gateway-address 119.81.59.81
+    host-name vga-sg
+    login {
+        user john {
+            authentication {
+                encrypted-password doe
+                plaintext-password ""
+            }
+            level admin
+        }
+    }
+    name-server 10.0.80.11
+    name-server 10.0.80.12
+    ntp {
+        server time.service.networklayer.com {
+        }
+    }
+    syslog {
+        global {
+            facility all {
+                level notice
+            }
+            facility protocols {
+                level debug
+            }
+        }
+        user all {
+            facility all {
+                level emerg
+            }
+        }
+    }
+    time-zone Asia/Singapore
+}
+vpn {
+    ipsec {
+        esp-group ESP-SG {
+            compression disable
+            lifetime 3600
+            mode tunnel
+            pfs enable
+            proposal 1 {
+                encryption aes256
+                hash sha1
+            }
+            proposal 2 {
+                encryption 3des
+                hash md5
+            }
+        }
+        ike-group IKE-SG {
+            lifetime 28800
+            proposal 1 {
+                encryption aes256
+                hash sha1
+            }
+            proposal 2 {
+                encryption aes128
+                hash sha1
+            }
+        }
+        ipsec-interfaces {
+            interface bond1
+        }
+        nat-networks {
+            allowed-network 0.0.0.0/0 {
+            }
+        }
+        nat-traversal enable
+        site-to-site {
+            peer 161.202.131.87 {
+                authentication {
+                    mode pre-shared-secret
+                    pre-shared-secret blah
+                }
+                connection-type initiate
+                default-esp-group ESP-SG
+                ike-group IKE-SG
+                local-address 119.81.59.84
+                tunnel 1 {
+                    allow-nat-networks disable
+                    allow-public-networks disable
+                    disable
+                    local {
+                        prefix 192.168.200.0/24
+                    }
+                    remote {
+                        prefix 192.168.100.0/24
+                    }
+                }
+            }
+        }
+    }
+    l2tp {
+        remote-access {
+            authentication {
+                local-users {
+                    username joe {
+                        password schmoe
+                    }
+                }
+                mode local
+            }
+            client-ip-pool {
+                start 192.168.200.101
+                stop 192.168.200.110
+            }
+            dns-servers {
+                server-1 8.8.8.8
+            }
+            ipsec-settings {
+                authentication {
+                    mode pre-shared-secret
+                    pre-shared-secret mySecret
+                }
+                ike-lifetime 3600
+            }
+            outside-address 119.81.59.84
+            outside-nexthop 119.81.59.81
+        }
+    }
+}
