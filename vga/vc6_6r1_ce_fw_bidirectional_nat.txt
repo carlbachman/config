@@ -1,0 +1,204 @@
+firewall {
+    all-ping enable
+    broadcast-ping disable
+    group {
+        address-group SSH_CLIENT {
+            address 15.56.2.26
+            address 19.1.77.6
+            description "Shell clients"
+        }
+    }
+    ipv6-receive-redirects disable
+    ipv6-src-route disable
+    ip-src-route disable
+    log-martians enable
+    name PROTECT_GW {
+        default-action drop
+        rule 100 {
+            action accept
+            destination {
+                port ssh
+            }
+            log enable
+            protocol tcp
+            source {
+                group {
+                    address-group SSH_CLIENT
+                }
+            }
+        }
+        rule 200 {
+            action drop
+            description "Allow ICMP"
+            protocol icmp
+        }
+    }
+    name PROTECT_PRIVATE_DOMAIN {
+        default-action drop
+        rule 100 {
+            action accept
+            destination {
+                port ssh
+            }
+            log enable
+            protocol tcp
+            source {
+                group {
+                    address-group SSH_CLIENT
+                }
+            }
+        }
+    }
+    receive-redirects disable
+    send-redirects enable
+    source-validation disable
+    state-policy {
+        established {
+            action accept
+        }
+        invalid {
+            action drop
+        }
+        related {
+            action accept
+        }
+    }
+    syn-cookies enable
+}
+interfaces {
+    ethernet eth0 {
+        address 10.132.206.168/26
+        duplex auto
+        hw-id 06:7b:c6:1e:5c:30
+        smp_affinity auto
+        speed auto
+    }
+    ethernet eth1 {
+        address 161.202.131.87/27
+        duplex auto
+        firewall {
+            in {
+                name PROTECT_PRIVATE_DOMAIN
+            }
+            local {
+                name PROTECT_GW
+            }
+        }
+        hw-id 06:7b:43:dc:d4:ec
+        smp_affinity auto
+        speed auto
+    }
+    loopback lo {
+    }
+}
+nat {
+    destination {
+        rule 10 {
+            destination {
+                address 161.202.131.87
+                port 5022
+            }
+            inbound-interface eth1
+            log enable
+            protocol tcp
+            translation {
+                address 10.132.206.171
+                port 22
+            }
+        }
+    }
+    source {
+        rule 10 {
+            outbound-interface eth1
+            source {
+                address 10.132.206.128/26
+            }
+            translation {
+                address masquerade
+            }
+        }
+    }
+}
+protocols {
+    static {
+        route 10.0.0.0/8 {
+            next-hop 10.132.206.129 {
+            }
+        }
+    }
+}
+service {
+    ssh {
+        port 22
+    }
+}
+system {
+    config-management {
+        commit-revisions 20
+    }
+    conntrack {
+        expect-table-size 2048
+        hash-size 32768
+        modules {
+            ftp {
+                disable
+            }
+            gre {
+                disable
+            }
+            h323 {
+                disable
+            }
+            nfs {
+                disable
+            }
+            pptp {
+                disable
+            }
+            sip {
+                disable
+            }
+            sqlnet {
+                disable
+            }
+            tftp {
+                disable
+            }
+        }
+        table-size 262144
+    }
+    console {
+        device ttyS0 {
+            speed 9600
+        }
+    }
+    domain-name softlayer-singapore-test.com
+    gateway-address 161.202.131.65
+    host-name tok
+    login {
+        user john {
+            authentication {
+                encrypted-password doe
+                plaintext-password ""
+            }
+            level admin
+        }
+    }
+    name-server 10.0.80.11
+    name-server 10.0.80.12
+    ntp {
+        server time.service.networklayer.com {
+        }
+    }
+    syslog {
+        global {
+            facility all {
+                level notice
+            }
+            facility protocols {
+                level debug
+            }
+        }
+    }
+    time-zone Asia/Tokyo
+}
